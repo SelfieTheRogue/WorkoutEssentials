@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "222634610090",
+    "project_id": "workoutessentials-2b8aa",
+    "storage_bucket": "workoutessentials-2b8aa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:222634610090:android:e6b064971a284aedae2fd3",
+        "android_client_info": {
+          "package_name": "no.hiof.workoutessentials"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzco5mhgQMFpHubhnsH-XcoQKFL8iW0tw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

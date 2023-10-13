@@ -42,8 +42,9 @@ fun Exercises() {
             style =MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center)
     }*/
+    //TODO Separate data class to its own file
     data class ExerciseItem(val title: String, val image: Int, val route: String)
-
+    //TODO Move dummy data to separate file
     val exerciseItems = listOf(
         ExerciseItem("Test 1",R.drawable.ic_launcher_foreground, "Placeholder 1"),
         ExerciseItem("Test 2",R.drawable.ic_launcher_foreground, "Placeholder 2"),
@@ -71,6 +72,7 @@ fun Exercises() {
     }
 }
 
+//TODO Remember to remove preview
 @Preview
 @Composable
 fun ExercisesPreview(){

@@ -42,8 +42,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 
 import androidx.navigation.compose.rememberNavController
 import no.hiof.workoutessentials.Screens.Home.resourceScreenName
+import no.hiof.workoutessentials.ui.Exercises
 import no.hiof.workoutessentials.ui.Home
 import no.hiof.workoutessentials.ui.Login
+import no.hiof.workoutessentials.ui.Planner
 import no.hiof.workoutessentials.ui.theme.WorkoutEssentialsTheme
 
 class MainActivity : ComponentActivity() {
@@ -65,7 +67,9 @@ class MainActivity : ComponentActivity() {
 
 enum class ScreenNames{
     Login,
-    Home
+    Home,
+    Exercises,
+    Planner
 }
 
 sealed class Screens(val route: String, @StringRes val resourceScreenName: Int, val icon: ImageVector) {
@@ -99,6 +103,8 @@ fun Navigation(){
             Modifier.padding(innerPadding)) {
             composable(ScreenNames.Login.name){Login(login = { navController.navigate(ScreenNames.Home.name)})}
             composable(ScreenNames.Home.name){ Home()}
+            composable(ScreenNames.Exercises.name){ Exercises()}
+            composable(ScreenNames.Planner.name){ Planner()}
         }
     }
 }
@@ -113,15 +119,15 @@ fun BottomNavigationBar( navController: NavHostController, bottomNavigationScree
     if (currentDestination != ScreenNames.Login.name) {
     NavigationBar {
 
-        bottomNavigationScreens.forEach{ screens ->
-            val resourceScreenName = stringResource(screens.resourceScreenName)
-
-
+        bottomNavigationScreens.forEach{ screens -> val resourceScreenName = stringResource(screens.resourceScreenName)
 
                 NavigationBarItem(selected = currentDestination == screens.route,
                     onClick = {
                         navController.navigate(screens.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
+                            /*Make the android back button route to home from different navbar tabs,
+                            instead of routing back to the login screen. Pressing back on home
+                            will route back to login then close the app after.*/
+                            popUpTo(ScreenNames.Home.name) {
                                 saveState = true
                             }
                             launchSingleTop = true

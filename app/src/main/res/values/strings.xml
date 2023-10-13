@@ -3,4 +3,6 @@
     <string name="login">login</string>
     <string name="workout_essentials">Workout Essentials</string>
     <string name="home">home</string>
+    <string name="planner">planner</string>
+    <string name="exercises">exercises</string>
 </resources>

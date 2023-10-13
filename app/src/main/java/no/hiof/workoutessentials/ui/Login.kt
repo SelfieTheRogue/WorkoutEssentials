@@ -36,7 +36,7 @@ fun Login(login: () -> Unit) {
                 )
         )
 
-        Button(onClick = { }) {
+        Button(onClick = { login()}) {
             Text(text = stringResource(R.string.login))
         }
     }

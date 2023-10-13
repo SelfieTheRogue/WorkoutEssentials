@@ -30,12 +30,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-<<<<<<< Updated upstream
-=======
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
 import no.hiof.workoutessentials.Screens.Home.resourceScreenName
->>>>>>> Stashed changes
 import no.hiof.workoutessentials.ui.Exercises
 import no.hiof.workoutessentials.ui.Home
 import no.hiof.workoutessentials.ui.Login

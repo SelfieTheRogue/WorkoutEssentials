@@ -1,8 +1,17 @@
 <resources>
     <string name="app_name">WorkoutEssentials</string>
-    <string name="login">login</string>
+    <string name="login">Login</string>
     <string name="workout_essentials">Workout Essentials</string>
     <string name="home">home</string>
     <string name="planner">planner</string>
     <string name="exercises">exercises</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="email_error">Not a valid email address</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_out">Sign out</string>
+    <string name="password_error">Your password should have at least eight digits and include one digit, one lower case letter and one upper case letter.</string>
+    <string name="login_error">Failed to login</string>
+    <string name="sign_up_error">Failed to create account</string>
+    <string name="anon_login">Login anonymously</string>
 </resources>

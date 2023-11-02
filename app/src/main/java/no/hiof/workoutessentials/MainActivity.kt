@@ -25,17 +25,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import no.hiof.workoutessentials.Screens.Home.resourceScreenName
 import no.hiof.workoutessentials.ui.Exercises
 import no.hiof.workoutessentials.ui.Home
-import no.hiof.workoutessentials.ui.Login
+import no.hiof.workoutessentials.ui.login.Login
 import no.hiof.workoutessentials.ui.Planner
 import no.hiof.workoutessentials.ui.theme.WorkoutEssentialsTheme
 
@@ -93,7 +94,7 @@ fun Navigation(){
         NavHost(navController = navController,
             startDestination = ScreenNames.Login.name,
             Modifier.padding(innerPadding)) {
-            composable(ScreenNames.Login.name){Login(login = { navController.navigate(ScreenNames.Home.name)})}
+            composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
             composable(ScreenNames.Home.name){ Home()}
             composable(ScreenNames.Exercises.name){ Exercises()}
             composable(ScreenNames.Planner.name){ Planner()}
@@ -106,9 +107,11 @@ fun BottomNavigationBar( navController: NavHostController, bottomNavigationScree
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination?.route
+    val auth = FirebaseAuth.getInstance()
+
 
     /* If statement to make sure navbar does not appear on the login screen.*/
-    if (currentDestination != ScreenNames.Login.name) {
+    if (auth.currentUser != null || currentDestination != ScreenNames.Login.name) {
     NavigationBar {
 
         bottomNavigationScreens.forEach{ screens -> val resourceScreenName = stringResource(screens.resourceScreenName)

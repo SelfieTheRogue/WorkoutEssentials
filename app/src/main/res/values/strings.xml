@@ -5,6 +5,7 @@
     <string name="home">home</string>
     <string name="planner">planner</string>
     <string name="exercises">exercises</string>
+    <string name="settings">settings</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="email_error">Not a valid email address</string>

@@ -74,11 +74,7 @@ class LoginViewModel @Inject constructor(private val accountService: AccountServ
         }
 
     }
-    fun onSignOut(){
-        viewModelScope.launch {
-            accountService.signOut()
-        }
-    }
+
     fun onCreateAnonymous(login: () -> Unit){
         viewModelScope.launch {
             try {
@@ -89,8 +85,5 @@ class LoginViewModel @Inject constructor(private val accountService: AccountServ
                 uiState.value = uiState.value.copy(errorMessage = R.string.login_error)
             }
         }
-    }
-    fun onLoggedIn(navController: NavController){
-        navController.navigate(ScreenNames.Home.name)
     }
 }

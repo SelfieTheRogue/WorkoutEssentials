@@ -46,7 +46,7 @@ import no.hiof.workoutessentials.ScreenNames
 
 @Composable
 fun Login(login: () -> Unit, modifier: Modifier = Modifier, viewModel: LoginViewModel = hiltViewModel()) {
-    //val navController = rememberNavController()
+
     val uiState by viewModel.uiState
     val isAnonymous by viewModel.isAnonymous.collectAsState(initial = true)
 

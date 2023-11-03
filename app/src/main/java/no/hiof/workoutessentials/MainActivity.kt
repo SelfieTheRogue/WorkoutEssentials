@@ -10,21 +10,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,7 +42,9 @@ import no.hiof.workoutessentials.ui.exercise.Exercises
 import no.hiof.workoutessentials.ui.home.Home
 import no.hiof.workoutessentials.ui.login.Login
 import no.hiof.workoutessentials.ui.planner.Planner
+import no.hiof.workoutessentials.ui.settings.Settings
 import no.hiof.workoutessentials.ui.theme.WorkoutEssentialsTheme
+import kotlin.math.sign
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -60,19 +68,22 @@ enum class ScreenNames{
     Login,
     Home,
     Exercises,
-    Planner
+    Planner,
+    Settings
 }
 
 sealed class Screens(val route: String, @StringRes val resourceScreenName: Int, val icon: ImageVector) {
-    object Planner : Screens("planner", R.string.planner, Icons.Default.AddCircle)
     object Home : Screens("home", R.string.home, Icons.Default.Home)
+    object Planner : Screens("planner", R.string.planner, Icons.Default.AddCircle)
     object Exercises : Screens("exercises", R.string.exercises, Icons.Default.List)
+    object Settings : Screens("settings", R.string.settings, Icons.Default.Settings)
 }
 
 val bottomNavigationScreens = listOf(
-    Screens.Planner,
     Screens.Home,
-    Screens.Exercises
+    Screens.Planner,
+    Screens.Exercises,
+    Screens.Settings
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,8 +93,9 @@ fun Navigation(){
     val auth = FirebaseAuth.getInstance()
 
     Scaffold(topBar = {
-        TopAppBar(title = { Text(stringResource(R.string.workout_essentials),
-            textAlign = TextAlign.Center) })
+        CenterAlignedTopAppBar(title = { Text(stringResource(R.string.workout_essentials),
+            textAlign = TextAlign.Center) }, Modifier.padding(4.dp)
+            )
     },
         bottomBar = {
             /*val currentRoute = navController.currentDestination?.route
@@ -97,6 +109,7 @@ fun Navigation(){
             composable(ScreenNames.Home.name){ Home() }
             composable(ScreenNames.Exercises.name){ Exercises() }
             composable(ScreenNames.Planner.name){ Planner() }
+            composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
         }
         }
         else{
@@ -107,6 +120,7 @@ fun Navigation(){
                 composable(ScreenNames.Home.name){ Home() }
                 composable(ScreenNames.Exercises.name){ Exercises() }
                 composable(ScreenNames.Planner.name){ Planner() }
+                composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
             }
         }
     }
@@ -123,10 +137,9 @@ fun BottomNavigationBar( navController: NavHostController, bottomNavigationScree
     /* If statement to make sure navbar does not appear on the login screen.*/
     if (auth.currentUser != null || currentDestination != ScreenNames.Login.name) {
     NavigationBar {
-
         bottomNavigationScreens.forEach{ screens -> val resourceScreenName = stringResource(screens.resourceScreenName)
-
-                NavigationBarItem(selected = currentDestination == screens.route,
+                NavigationBarItem(
+                    selected = currentDestination == screens.route,
                     onClick = {
                         navController.navigate(screens.route) {
                             /*Make the android back button route to home from different navbar tabs,
@@ -145,7 +158,8 @@ fun BottomNavigationBar( navController: NavHostController, bottomNavigationScree
                             contentDescription = resourceScreenName
                         )
                     },
-                    label = { Text(resourceScreenName) })
+                    label = {Text(resourceScreenName)}
+                )
             }
         }
     }

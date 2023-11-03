@@ -92,15 +92,6 @@ fun Login(login: () -> Unit, modifier: Modifier = Modifier, viewModel: LoginView
             }
         }
     }
-    else{
-    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        Button(
-            onClick = { viewModel.onSignOut() },
-            modifier = Modifier.padding(16.dp, 8.dp)
-        ) {
-            Text(text = stringResource(R.string.sign_out), fontSize = 16.sp)
-        }
-    } }
 }
 
 

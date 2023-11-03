@@ -1,4 +1,4 @@
-package no.hiof.workoutessentials.ui
+package no.hiof.workoutessentials.ui.home
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column

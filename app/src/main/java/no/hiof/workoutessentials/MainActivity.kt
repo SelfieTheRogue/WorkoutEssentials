@@ -25,8 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,10 +32,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import no.hiof.workoutessentials.ui.Exercises
-import no.hiof.workoutessentials.ui.Home
+import no.hiof.workoutessentials.ui.exercise.Exercises
+import no.hiof.workoutessentials.ui.home.Home
 import no.hiof.workoutessentials.ui.login.Login
-import no.hiof.workoutessentials.ui.Planner
+import no.hiof.workoutessentials.ui.planner.Planner
 import no.hiof.workoutessentials.ui.theme.WorkoutEssentialsTheme
 
 @AndroidEntryPoint
@@ -81,6 +79,7 @@ val bottomNavigationScreens = listOf(
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
 
     Scaffold(topBar = {
         TopAppBar(title = { Text(stringResource(R.string.workout_essentials),
@@ -91,13 +90,24 @@ fun Navigation(){
             if (currentRoute != ScreenNames.Login.name){*/
             BottomNavigationBar(navController, bottomNavigationScreens)//}
         }) {innerPadding ->
-        NavHost(navController = navController,
+        if (auth.currentUser == null){NavHost(navController = navController,
             startDestination = ScreenNames.Login.name,
             Modifier.padding(innerPadding)) {
             composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-            composable(ScreenNames.Home.name){ Home()}
-            composable(ScreenNames.Exercises.name){ Exercises()}
-            composable(ScreenNames.Planner.name){ Planner()}
+            composable(ScreenNames.Home.name){ Home() }
+            composable(ScreenNames.Exercises.name){ Exercises() }
+            composable(ScreenNames.Planner.name){ Planner() }
+        }
+        }
+        else{
+            NavHost(navController = navController,
+                startDestination = ScreenNames.Home.name,
+                Modifier.padding(innerPadding)) {
+                composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
+                composable(ScreenNames.Home.name){ Home() }
+                composable(ScreenNames.Exercises.name){ Exercises() }
+                composable(ScreenNames.Planner.name){ Planner() }
+            }
         }
     }
 }

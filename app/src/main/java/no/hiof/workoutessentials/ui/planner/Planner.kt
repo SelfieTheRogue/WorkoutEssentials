@@ -1,4 +1,4 @@
-package no.hiof.workoutessentials.ui
+package no.hiof.workoutessentials.ui.planner
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

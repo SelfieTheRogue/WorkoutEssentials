@@ -17,16 +17,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,12 +35,12 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import no.hiof.workoutessentials.ui.exercise.Exercises
+import no.hiof.workoutessentials.ui.home.ApiViewModel
 import no.hiof.workoutessentials.ui.home.Home
 import no.hiof.workoutessentials.ui.login.Login
 import no.hiof.workoutessentials.ui.planner.Planner
 import no.hiof.workoutessentials.ui.settings.Settings
 import no.hiof.workoutessentials.ui.theme.WorkoutEssentialsTheme
-import kotlin.math.sign
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -61,6 +57,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
     }
 }
 
@@ -106,7 +103,7 @@ fun Navigation(){
             startDestination = ScreenNames.Login.name,
             Modifier.padding(innerPadding)) {
             composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-            composable(ScreenNames.Home.name){ Home() }
+            composable(ScreenNames.Home.name){ Home(ApiViewModel()) }
             composable(ScreenNames.Exercises.name){ Exercises() }
             composable(ScreenNames.Planner.name){ Planner() }
             composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
@@ -117,7 +114,7 @@ fun Navigation(){
                 startDestination = ScreenNames.Home.name,
                 Modifier.padding(innerPadding)) {
                 composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-                composable(ScreenNames.Home.name){ Home() }
+                composable(ScreenNames.Home.name){ Home(ApiViewModel()) }
                 composable(ScreenNames.Exercises.name){ Exercises() }
                 composable(ScreenNames.Planner.name){ Planner() }
                 composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}

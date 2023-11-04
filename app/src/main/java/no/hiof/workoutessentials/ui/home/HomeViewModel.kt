@@ -1,4 +1,36 @@
 package no.hiof.workoutessentials.ui.home
 
-class HomeViewModel {
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import no.hiof.workoutessentials.model.Exercise
+import no.hiof.workoutessentials.service.api.ApiService
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
+class ApiViewModel : ViewModel() {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.api-ninjas.com/v1/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val apiService = retrofit.create(ApiService::class.java)
+
+    private val _data = MutableLiveData<List<Exercise>?>(null)
+    val data: LiveData<List<Exercise>?> = _data
+
+    fun fetchData() {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getExercise()
+                if (response.isSuccessful) {
+                    _data.value = response.body()
+                }
+            } catch (e: Exception) {
+                // error
+            }
+        }
+    }
 }

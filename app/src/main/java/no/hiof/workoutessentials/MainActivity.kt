@@ -35,7 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import no.hiof.workoutessentials.ui.exercise.Exercises
-import no.hiof.workoutessentials.ui.home.ApiViewModel
+import no.hiof.workoutessentials.service.api.ApiViewModel
 import no.hiof.workoutessentials.ui.home.Home
 import no.hiof.workoutessentials.ui.login.Login
 import no.hiof.workoutessentials.ui.planner.Planner

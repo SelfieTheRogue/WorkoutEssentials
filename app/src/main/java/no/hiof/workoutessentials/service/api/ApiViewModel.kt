@@ -1,4 +1,4 @@
-package no.hiof.workoutessentials.ui.home
+package no.hiof.workoutessentials.service.api
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import no.hiof.workoutessentials.model.Exercise
-import no.hiof.workoutessentials.service.api.ApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

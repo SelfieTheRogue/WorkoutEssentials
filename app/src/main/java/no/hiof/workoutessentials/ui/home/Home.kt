@@ -72,13 +72,13 @@ fun Home(viewModel: ApiViewModel) {
             Text(exercise,
                 style = MaterialTheme.typography.headlineLarge)
             Column (horizontalAlignment = Alignment.CenterHorizontally){
-                data?.let {
+                /*data?.let {
                     for (exercises in it) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = exercises.name)
                         }
                     }
-                }
+                }*/
             }
         }
     }

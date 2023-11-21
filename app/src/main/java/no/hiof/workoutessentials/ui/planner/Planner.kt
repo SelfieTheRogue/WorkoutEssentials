@@ -6,13 +6,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -22,23 +25,56 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import no.hiof.workoutessentials.model.Exercise
+import no.hiof.workoutessentials.service.api.ApiViewModel
+
+var exerciseList: List<Exercise>? = null
 
 @Composable
 fun Planner() {
 
+    val viewModel: ApiViewModel = viewModel()
+
     var showEditor by remember { mutableStateOf(false)}
+    var buttonDay by remember { mutableStateOf("")}
+
+    val data by viewModel.data.observeAsState()
+
+    DisposableEffect(Unit) {
+        viewModel.fetchData("exercises?")
+
+        onDispose { }
+    }
+
+    data?.let {
+        exerciseList = it
+    }
 
     if (showEditor == true) {
+
         Dialog(onDismissRequest = {showEditor = false}) {
+
             Card (modifier = Modifier
                 .fillMaxWidth()
                 .height(375.dp)
                 .padding(16.dp),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(8.dp)
             ){
             }
-            Button(onClick = { showEditor = false }) {
+            Column() {
+                Button(onClick = { showEditor = false }) {
 
+                }
+                LazyColumn() {
+                    exerciseList?.let {
+                        items(it.size) { index ->
+                            Button(onClick = { /*TODO*/ }) {
+                                Text(text = exerciseList!!.get(index).name)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -58,7 +94,8 @@ fun Planner() {
                     modifier = Modifier.weight(0.50F))
                 Column (modifier = Modifier.weight(1F),
                     horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { showEditor = true },
+                    Button(onClick = { showEditor = true
+                                     buttonDay = "monday"},
                         modifier = Modifier
                             .weight(1.0F)
                             .padding(10.dp, 0.dp)) {
@@ -184,23 +221,6 @@ fun Planner() {
             }
         }
     }
-}
-
-@Composable
-fun showDialog(onDismissRequest: () -> Unit) {
-    Dialog(onDismissRequest = {onDismissRequest()}) {
-        Card (modifier = Modifier
-            .fillMaxWidth()
-            .height(375.dp)
-            .padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
-        ){
-        }
-        Button(onClick = { onDismissRequest() }) {
-            
-        }
-    }
-
 }
 
 @Preview

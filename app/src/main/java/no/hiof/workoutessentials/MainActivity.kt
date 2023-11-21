@@ -35,7 +35,6 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import no.hiof.workoutessentials.ui.exercise.Exercises
-import no.hiof.workoutessentials.service.api.ApiViewModel
 import no.hiof.workoutessentials.ui.home.Home
 import no.hiof.workoutessentials.ui.login.Login
 import no.hiof.workoutessentials.ui.planner.Planner
@@ -103,7 +102,7 @@ fun Navigation(){
             startDestination = ScreenNames.Login.name,
             Modifier.padding(innerPadding)) {
             composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-            composable(ScreenNames.Home.name){ Home(ApiViewModel()) }
+            composable(ScreenNames.Home.name){ Home() }
             composable(ScreenNames.Exercises.name){ Exercises() }
             composable(ScreenNames.Planner.name){ Planner() }
             composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
@@ -114,7 +113,7 @@ fun Navigation(){
                 startDestination = ScreenNames.Home.name,
                 Modifier.padding(innerPadding)) {
                 composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-                composable(ScreenNames.Home.name){ Home(ApiViewModel()) }
+                composable(ScreenNames.Home.name){ Home() }
                 composable(ScreenNames.Exercises.name){ Exercises() }
                 composable(ScreenNames.Planner.name){ Planner() }
                 composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}

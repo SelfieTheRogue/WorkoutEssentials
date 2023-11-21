@@ -20,16 +20,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import no.hiof.workoutessentials.service.api.ApiViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Home(viewModel: ApiViewModel) {
+fun Home() {
+
+    val viewModel: ApiViewModel = viewModel()
+
+    var listOfExercises by remember { mutableStateOf(listOf(String))}
+    var basedUrl by remember { mutableStateOf("exercises?")}
+
+    /*if (listOfExercises != null) {
+        for (exercise in listOfExercises) {
+            basedUrl = basedUrl + "name=" + exercise + "&"
+        }
+    }
+    else {
+        basedUrl = "exercises?name=bicep"
+    }*/
+
 
     val data by viewModel.data.observeAsState()
     DisposableEffect(Unit) {
-        viewModel.fetchData()
+        viewModel.fetchData(basedUrl)
 
         onDispose { }
     }
@@ -72,13 +88,13 @@ fun Home(viewModel: ApiViewModel) {
             Text(exercise,
                 style = MaterialTheme.typography.headlineLarge)
             Column (horizontalAlignment = Alignment.CenterHorizontally){
-                /*data?.let {
-                    for (exercises in it) {
+                data?.let {
+                    for (exercise in it) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = exercises.name)
+                            Text(text = exercise.name)
                         }
                     }
-                }*/
+                }
             }
         }
     }
@@ -86,5 +102,5 @@ fun Home(viewModel: ApiViewModel) {
 @Preview
 @Composable
 fun HomePreview() {
-    Home(ApiViewModel())
+    Home()
 }

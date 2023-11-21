@@ -20,10 +20,10 @@ class ApiViewModel : ViewModel() {
     private val _data = MutableLiveData<List<Exercise>?>(null)
     val data: LiveData<List<Exercise>?> = _data
 
-    fun fetchData() {
+    fun fetchData(url: String) {
         viewModelScope.launch {
             try {
-                val response = apiService.getExercise()
+                val response = apiService.getExercise(url)
                 if (response.isSuccessful) {
                     _data.value = response.body()
                 }

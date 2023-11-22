@@ -34,15 +34,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import no.hiof.workoutessentials.service.StorageService
 import no.hiof.workoutessentials.ui.exercise.Exercises
 import no.hiof.workoutessentials.ui.home.Home
 import no.hiof.workoutessentials.ui.login.Login
 import no.hiof.workoutessentials.ui.planner.Planner
 import no.hiof.workoutessentials.ui.settings.Settings
 import no.hiof.workoutessentials.ui.theme.WorkoutEssentialsTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var storageService: StorageService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -52,7 +58,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation()
+                    Navigation(storageService)
                 }
             }
         }
@@ -84,7 +90,7 @@ val bottomNavigationScreens = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Navigation(){
+fun Navigation(storageService: StorageService){
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
 
@@ -102,9 +108,9 @@ fun Navigation(){
             startDestination = ScreenNames.Login.name,
             Modifier.padding(innerPadding)) {
             composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-            composable(ScreenNames.Home.name){ Home() }
+            composable(ScreenNames.Home.name){ Home(storageService) }
             composable(ScreenNames.Exercises.name){ Exercises() }
-            composable(ScreenNames.Planner.name){ Planner() }
+            composable(ScreenNames.Planner.name){ Planner(storageService) }
             composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
         }
         }
@@ -113,9 +119,9 @@ fun Navigation(){
                 startDestination = ScreenNames.Home.name,
                 Modifier.padding(innerPadding)) {
                 composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-                composable(ScreenNames.Home.name){ Home() }
+                composable(ScreenNames.Home.name){ Home(storageService) }
                 composable(ScreenNames.Exercises.name){ Exercises() }
-                composable(ScreenNames.Planner.name){ Planner() }
+                composable(ScreenNames.Planner.name){ Planner(storageService) }
                 composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
             }
         }

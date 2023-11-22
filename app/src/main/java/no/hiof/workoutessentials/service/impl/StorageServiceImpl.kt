@@ -21,8 +21,8 @@ class StorageServiceImpl @Inject constructor(
                     .await()
 
                 if (documentSnapshot.exists()){
-                    val dayExercises = documentSnapshot.getString(day)
-                    return dayExercises?.split(",") ?: emptyList()
+                    val dayExercises = documentSnapshot.get(day)
+                    return dayExercises as List<String>
                 } else{
                     emptyList()
                 }

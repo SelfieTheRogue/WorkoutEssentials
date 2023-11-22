@@ -1,19 +1,30 @@
 package no.hiof.workoutessentials.ui.planner
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -27,17 +38,112 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import no.hiof.workoutessentials.model.Exercise
+import no.hiof.workoutessentials.service.StorageService
 import no.hiof.workoutessentials.service.api.ApiViewModel
 
 var exerciseList: List<Exercise>? = null
 
 @Composable
-fun Planner() {
+fun AddExerciseDialog(
+    exerciseList: List<Exercise>,
+    onAddExercise: (Exercise) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var offset by remember { mutableStateOf(0) }
+
+    val viewModel: ApiViewModel = viewModel()
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(600.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                // Your UI for adding exercises
+                LazyColumn (modifier = Modifier.height(400.dp)) {
+                    items(exerciseList) { exercise ->
+                        Button(onClick = { onAddExercise(exercise) }, modifier = Modifier.fillMaxSize()) {
+                            Text(text = exercise.name)
+                        }
+                    }
+                }
+                //Arrow Icons for scrolling through list
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    IconButton(onClick = { if(offset>0){offset -= 10 }}) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Scroll Back")
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    IconButton(onClick = { offset += 10 }) {
+                        Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "Scroll Forward")
+                    }
+                }
+                // Confirm and Cancel buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(onClick = onConfirm) {
+                        Text("Confirm")
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Button(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        }
+    }
+    //Updating list for scrolling
+    LaunchedEffect(offset) {
+        val exerciseList = viewModel.fetchData("exercises?offset=" + offset.toString())
+}
+
+
+
+@Composable
+fun Planner(storageService: StorageService) {
 
     val viewModel: ApiViewModel = viewModel()
 
     var showEditor by remember { mutableStateOf(false)}
+    var confirmEdit by remember { mutableStateOf(false)}
     var buttonDay by remember { mutableStateOf("")}
+
+    var addingExerciseList by remember { mutableStateOf<List<Exercise>>(emptyList()) }
+
+    LaunchedEffect(confirmEdit) {
+        if (confirmEdit) {
+            try {
+                // Perform the asynchronous operation (e.g., network request or database query)
+                val exerciseNames = addingExerciseList.map { it.name }
+                storageService.saveExercises(buttonDay, exerciseNames)
+            } catch (e: Exception) {
+                // Handle errors if necessary
+                // You might want to log the error or show a user-friendly message
+                // depending on your use case.
+            } finally {
+                // Reset states after the operation is complete
+                confirmEdit = false
+                addingExerciseList = emptyList()
+            }
+        }
+    }
 
     val data by viewModel.data.observeAsState()
 
@@ -52,31 +158,15 @@ fun Planner() {
     }
 
     if (showEditor == true) {
-
-        Dialog(onDismissRequest = {showEditor = false}) {
-
-            Card (modifier = Modifier
-                .fillMaxWidth()
-                .height(375.dp)
-                .padding(16.dp),
-                shape = RoundedCornerShape(8.dp)
-            ){
-            }
-            Column() {
-                Button(onClick = { showEditor = false }) {
-
-                }
-                LazyColumn() {
-                    exerciseList?.let {
-                        items(it.size) { index ->
-                            Button(onClick = { /*TODO*/ }) {
-                                Text(text = exerciseList!!.get(index).name)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        AddExerciseDialog(
+            exerciseList = exerciseList ?: emptyList(),
+            onAddExercise = { exercise -> addingExerciseList += exercise },
+            onConfirm = {
+                confirmEdit = true
+                showEditor = false
+            },
+            onDismiss = { showEditor = false }
+        )
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -84,139 +174,201 @@ fun Planner() {
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center)
         Column (modifier = Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally){
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Mon",
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Mon",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { showEditor = true
-                                     buttonDay = "monday"},
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "monday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Tue",
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Tue",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "tuesday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Wed",
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Wed",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "wednesday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Thu",
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Thu",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "thursday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Fri",
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Fri",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "friday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Sat",
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Sat",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "saturday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
-            Row (modifier = Modifier
-                .weight(1.0F)
-                .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Sun",
+            Row(
+                modifier = Modifier
+                    .weight(1.0F)
+                    .padding(0.dp, 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Sun",
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.50F))
-                Column (modifier = Modifier.weight(1F),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.weight(0.50F)
+                )
+                Column(
+                    modifier = Modifier.weight(1F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showEditor = true
+                            buttonDay = "sunday"
+                        },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)) {
+                            .padding(10.dp, 0.dp)
+                    ) {
                         Text("Edit")
                     }
-                    Text(text = "No Exercises added",
-                        modifier = Modifier.weight(1F))
                 }
             }
         }
@@ -226,5 +378,6 @@ fun Planner() {
 @Preview
 @Composable
 fun PlannerPreview(){
-    Planner()
+    lateinit var storageService: StorageService
+    Planner(storageService)
 }

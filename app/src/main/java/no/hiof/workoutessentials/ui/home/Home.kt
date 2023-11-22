@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -21,36 +22,19 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import no.hiof.workoutessentials.service.StorageService
 import no.hiof.workoutessentials.service.api.ApiViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+
 
 @Composable
-fun Home() {
+fun Home(storageService: StorageService) {
 
     val viewModel: ApiViewModel = viewModel()
 
-    var listOfExercises by remember { mutableStateOf(listOf(String))}
-    var basedUrl by remember { mutableStateOf("exercises?")}
-
-
-
-    /*if (listOfExercises != null) {
-        for (exercise in listOfExercises) {
-            basedUrl = basedUrl + "name=" + exercise + "&"
-        }
-    }
-    else {
-        basedUrl = "exercises?name=bicep"
-    }*/
-
-
-    val data by viewModel.data.observeAsState()
-    DisposableEffect(Unit) {
-        viewModel.fetchData(basedUrl)
-
-        onDispose { }
-    }
+    var buttonClicked by remember { mutableStateOf(false) }
 
     val date = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("EEEE")
@@ -64,7 +48,55 @@ fun Home() {
         date.plusDays(6)
     )
 
-    var exercise by remember { mutableStateOf(date.format(formatter)) }
+    fun urlGen (exercises: List<String>): String {
+        var url = ""
+        if (exercises != null) {
+            url = "exercises?"
+            for (exercise in exercises) {
+                url = url + "name=" + exercise.replace("_", "+") + "&"
+            }
+            url = url.dropLast(1)
+        }
+
+        return url
+    }
+
+    val exercisesState = remember { mutableStateOf<List<String>>(emptyList()) }
+
+    var selectedDay by remember { mutableStateOf(date.format(formatter)) }
+
+    LaunchedEffect(buttonClicked, selectedDay) {
+        if (buttonClicked) {
+            try {
+                // Perform the asynchronous operation (e.g., network request or database query)
+                val exerciseList = storageService.getExercises(selectedDay.replaceFirstChar {
+                    it.lowercase(
+                        Locale.ROOT
+                    )
+                })
+
+                // Update the UI state with the result
+                exercisesState.value = exerciseList
+
+            } catch (e: Exception) {
+                // Handle errors if necessary
+                // You might want to log the error or show a user-friendly message
+                // depending on your use case.
+            } finally {
+                // Reset the buttonClicked state after the operation is complete
+                buttonClicked = false
+            }
+        }
+    }
+
+    val data by viewModel.data.observeAsState()
+    DisposableEffect(Unit) {
+        viewModel.fetchData("exercises?")
+
+        onDispose { }
+    }
+
+
 
     Row (modifier = Modifier.fillMaxSize()){
         Column (horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,7 +108,10 @@ fun Home() {
 
 
                 for (date in weekDates) {
-                    Button(onClick = {exercise = date.format(formatter)}, modifier = Modifier
+                    Button(onClick = {selectedDay = date.format(formatter)
+                        buttonClicked = true
+                                     },
+                        modifier = Modifier
                         .weight(1F)
                         .fillMaxWidth(), shape = RectangleShape) {
                         Text(date.format(formatter), modifier = Modifier.fillMaxWidth())
@@ -87,22 +122,30 @@ fun Home() {
         }
         Column (horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1F)) {
-            Text(exercise,
+            Text(selectedDay,
                 style = MaterialTheme.typography.headlineLarge)
             Column (horizontalAlignment = Alignment.CenterHorizontally){
-                data?.let {
+                for (exercise in exercisesState.value) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = exercise.replace("_", " "))
+                    }
+                }
+            /*data?.let {
                     for (exercise in it) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = exercise.name)
                         }
                     }
-                }
+                }*/
+                /*Text(text = urlGen(exercisesState.value))*/
             }
         }
     }
 }
+
 @Preview
 @Composable
 fun HomePreview() {
-    Home()
+    lateinit var storageService: StorageService
+    Home(storageService)
 }

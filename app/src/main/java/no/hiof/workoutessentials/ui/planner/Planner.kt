@@ -164,7 +164,7 @@ fun Planner(storageService: StorageService) {
     }
 
     data?.let {
-        val exerciseList = it
+        exerciseList = it
     }
 
     if (showEditor == true) {

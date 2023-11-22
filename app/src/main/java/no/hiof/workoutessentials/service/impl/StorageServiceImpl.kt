@@ -10,7 +10,7 @@ class StorageServiceImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: AccountService) : StorageService{
 
-        //Functions to get or save data to and from firebase
+        //Function to get exercises for specific day and user
         override suspend fun getExercises(day: String): List<String>{
             val userId = auth.currentUserId
 
@@ -27,11 +27,12 @@ class StorageServiceImpl @Inject constructor(
                     emptyList()
                 }
             } catch (e: Exception){
+                println("getExercises has thrown exception: $e")
                 emptyList()
-                //add logging
             }
         }
 
+        //function to save exercises to specific day and user.
         override suspend fun saveExercises(day: String, workoutNames: List<String>) {
             val userId = auth.currentUserId
 
@@ -40,11 +41,7 @@ class StorageServiceImpl @Inject constructor(
                 documentRef.update(day, workoutNames)
                     .await()
             } catch(e: Exception) {
-                //add logging
+                println("saveExercises has thrown exception: $e")
             }
         }
-        /*TODO Implement get for all exercises linked to user*/
-
-        //override suspend fun save/edit()
-        /* TODO Implement the methods to save and edit exercises for the week*/
     }

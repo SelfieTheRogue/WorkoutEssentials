@@ -68,9 +68,12 @@ fun AddExerciseDialog(
                     .padding(16.dp)
             ) {
                 // Your UI for adding exercises
-                LazyColumn (modifier = Modifier.height(400.dp)) {
+                LazyColumn(modifier = Modifier.height(400.dp)) {
                     items(exerciseList) { exercise ->
-                        Button(onClick = { onAddExercise(exercise) }, modifier = Modifier.fillMaxSize()) {
+                        Button(
+                            onClick = { onAddExercise(exercise) },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
                             Text(text = exercise.name)
                         }
                     }
@@ -83,12 +86,22 @@ fun AddExerciseDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
 
-                    IconButton(onClick = { if(offset>0){offset -= 10 }}) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Scroll Back")
+                    IconButton(onClick = {
+                        if (offset > 0) {
+                            offset -= 10
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Scroll Back"
+                        )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     IconButton(onClick = { offset += 10 }) {
-                        Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "Scroll Forward")
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Scroll Forward"
+                        )
                     }
                 }
                 // Confirm and Cancel buttons
@@ -112,8 +125,8 @@ fun AddExerciseDialog(
     //Updating list for scrolling
     LaunchedEffect(offset) {
         val exerciseList = viewModel.fetchData("exercises?offset=" + offset.toString())
+    }
 }
-
 
 
 @Composable
@@ -121,22 +134,19 @@ fun Planner(storageService: StorageService) {
 
     val viewModel: ApiViewModel = viewModel()
 
-    var showEditor by remember { mutableStateOf(false)}
-    var confirmEdit by remember { mutableStateOf(false)}
-    var buttonDay by remember { mutableStateOf("")}
+    var showEditor by remember { mutableStateOf(false) }
+    var confirmEdit by remember { mutableStateOf(false) }
+    var buttonDay by remember { mutableStateOf("") }
 
     var addingExerciseList by remember { mutableStateOf<List<Exercise>>(emptyList()) }
 
     LaunchedEffect(confirmEdit) {
         if (confirmEdit) {
             try {
-                // Perform the asynchronous operation (e.g., network request or database query)
                 val exerciseNames = addingExerciseList.map { it.name }
                 storageService.saveExercises(buttonDay, exerciseNames)
             } catch (e: Exception) {
-                // Handle errors if necessary
-                // You might want to log the error or show a user-friendly message
-                // depending on your use case.
+                // Handle errors
             } finally {
                 // Reset states after the operation is complete
                 confirmEdit = false
@@ -154,7 +164,7 @@ fun Planner(storageService: StorageService) {
     }
 
     data?.let {
-        exerciseList = it
+        val exerciseList = it
     }
 
     if (showEditor == true) {
@@ -170,11 +180,15 @@ fun Planner(storageService: StorageService) {
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "The Planner",
+        Text(
+            text = "The Planner",
             style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center)
-        Column (modifier = Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            textAlign = TextAlign.Center
+        )
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 modifier = Modifier
                     .weight(1.0F)

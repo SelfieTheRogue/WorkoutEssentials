@@ -22,8 +22,6 @@ class SettingsViewModel @Inject constructor(private val accountService: AccountS
             catch (e: Exception){
 
             }
-
-
         }
     }
 }

@@ -33,6 +33,8 @@ fun Home() {
     var listOfExercises by remember { mutableStateOf(listOf(String))}
     var basedUrl by remember { mutableStateOf("exercises?")}
 
+
+
     /*if (listOfExercises != null) {
         for (exercise in listOfExercises) {
             basedUrl = basedUrl + "name=" + exercise + "&"

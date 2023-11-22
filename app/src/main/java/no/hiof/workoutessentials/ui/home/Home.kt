@@ -68,7 +68,7 @@ fun Home(storageService: StorageService) {
     LaunchedEffect(buttonClicked, selectedDay) {
         if (buttonClicked) {
             try {
-                // Perform the asynchronous operation (e.g., network request or database query)
+                // Perform the asynchronous operation
                 val exerciseList = storageService.getExercises(selectedDay.replaceFirstChar {
                     it.lowercase(
                         Locale.ROOT
@@ -79,9 +79,7 @@ fun Home(storageService: StorageService) {
                 exercisesState.value = exerciseList
 
             } catch (e: Exception) {
-                // Handle errors if necessary
-                // You might want to log the error or show a user-friendly message
-                // depending on your use case.
+                // Handle errors
             } finally {
                 // Reset the buttonClicked state after the operation is complete
                 buttonClicked = false
@@ -130,14 +128,6 @@ fun Home(storageService: StorageService) {
                         Text(text = exercise.replace("_", " "))
                     }
                 }
-            /*data?.let {
-                    for (exercise in it) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = exercise.name)
-                        }
-                    }
-                }*/
-                /*Text(text = urlGen(exercisesState.value))*/
             }
         }
     }

@@ -3,12 +3,10 @@ package no.hiof.workoutessentials.ui.login
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import no.hiof.workoutessentials.R
-import no.hiof.workoutessentials.ScreenNames
 import no.hiof.workoutessentials.isValidEmail
 import no.hiof.workoutessentials.isValidPassword
 import no.hiof.workoutessentials.service.AccountService
@@ -25,12 +23,16 @@ class LoginViewModel @Inject constructor(private val accountService: AccountServ
 
     val isAnonymous = accountService.currentUser.map { it.isAnonymous }
 
+    //Gets email value from text field.
     fun onEmailChange(newValue: String){
         uiState.value = uiState.value.copy(email = newValue)
     }
+    //Gets password value from text field.
     fun onPasswordChange(newValue: String){
         uiState.value = uiState.value.copy(password = newValue)
     }
+    //onLogin() calls the authenticate() function from AccountServiceImpl.kt to authenticate the user,
+    //the routes it to the home page if successful
     fun onLogin(login: () -> Unit){
         if (!email.isValidEmail()){
             uiState.value = uiState.value.copy(errorMessage = R.string.email_error)
@@ -52,6 +54,8 @@ class LoginViewModel @Inject constructor(private val accountService: AccountServ
             }
         }
     }
+    //onSignUp() calls the linkAccount function from AccountServiceImpl.kt to create a user,
+    //then logs it in and routes it to the home page if successful.
     fun onSignUp(login: () -> Unit){
         if (!email.isValidEmail()){
             uiState.value = uiState.value.copy(errorMessage = R.string.email_error)
@@ -74,7 +78,7 @@ class LoginViewModel @Inject constructor(private val accountService: AccountServ
         }
 
     }
-
+    //Calls the createAnonymousAccount() function in AccountServiceImpl.kt to create an anonymous account.
     fun onCreateAnonymous(login: () -> Unit){
         viewModelScope.launch {
             try {

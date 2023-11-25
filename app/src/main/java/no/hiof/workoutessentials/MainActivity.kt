@@ -99,19 +99,21 @@ fun Navigation(storageService: StorageService){
             textAlign = TextAlign.Center) }, Modifier.padding(4.dp)
             )
     },
+        /*If statements used to change start destination dependent on current user, if user is logged in
+            the start destination will be the home screen and login screen if not logged in.*/
         bottomBar = {
-            /*val currentRoute = navController.currentDestination?.route
-            if (currentRoute != ScreenNames.Login.name){*/
             BottomNavigationBar(navController, bottomNavigationScreens)//}
         }) {innerPadding ->
-        if (auth.currentUser == null){NavHost(navController = navController,
-            startDestination = ScreenNames.Login.name,
-            Modifier.padding(innerPadding)) {
-            composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
-            composable(ScreenNames.Home.name){ Home(storageService) }
-            composable(ScreenNames.Exercises.name){ Exercises() }
-            composable(ScreenNames.Planner.name){ Planner(storageService) }
-            composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
+        if (auth.currentUser == null){
+            NavHost(navController = navController,
+                startDestination = ScreenNames.Login.name,
+                Modifier.padding(innerPadding)) {
+                composable(ScreenNames.Login.name){ Login(login = { navController.navigate(ScreenNames.Home.name)}) }
+                composable(ScreenNames.Home.name){ Home(storageService) }
+                composable(ScreenNames.Exercises.name){ Exercises() }
+                composable(ScreenNames.Planner.name){ Planner(storageService) }
+                composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)},
+                    deleteAccount = {navController.navigate(ScreenNames.Login.name)})}
         }
         }
         else{
@@ -122,7 +124,8 @@ fun Navigation(storageService: StorageService){
                 composable(ScreenNames.Home.name){ Home(storageService) }
                 composable(ScreenNames.Exercises.name){ Exercises() }
                 composable(ScreenNames.Planner.name){ Planner(storageService) }
-                composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)})}
+                composable(ScreenNames.Settings.name){ Settings(signOut = {navController.navigate(ScreenNames.Login.name)},
+                    deleteAccount = {navController.navigate(ScreenNames.Login.name)})}
             }
         }
     }

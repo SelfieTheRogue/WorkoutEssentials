@@ -4,7 +4,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.grpc.Context.Storage
 import no.hiof.workoutessentials.service.AccountService
 import no.hiof.workoutessentials.service.StorageService
 import no.hiof.workoutessentials.service.impl.AccountServiceImpl

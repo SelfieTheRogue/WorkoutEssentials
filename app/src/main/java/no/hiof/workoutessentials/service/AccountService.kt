@@ -9,8 +9,10 @@ interface AccountService {
     val hasUser: Boolean
     val currentUser: Flow<User>
 
+
     suspend fun authenticate(email: String, password: String, onResult: (Throwable?) -> Unit)
     suspend fun createAnonymousAccount()
     suspend fun linkAccount(email: String, password: String, onResult: (Throwable?) -> Unit)
     suspend fun signOut()
+    suspend fun deleteAccount()
 }

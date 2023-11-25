@@ -89,7 +89,7 @@ fun Home(storageService: StorageService) {
 
     val data by viewModel.data.observeAsState()
     DisposableEffect(Unit) {
-        viewModel.fetchData("exercises?")
+        viewModel.fetchData("exercises?name=Landmine+twist")
 
         onDispose { }
     }
@@ -110,8 +110,8 @@ fun Home(storageService: StorageService) {
                         buttonClicked = true
                                      },
                         modifier = Modifier
-                        .weight(1F)
-                        .fillMaxWidth(), shape = RectangleShape) {
+                            .weight(1F)
+                            .fillMaxWidth(), shape = RectangleShape) {
                         Text(date.format(formatter), modifier = Modifier.fillMaxWidth())
                     }
                 }
@@ -126,6 +126,13 @@ fun Home(storageService: StorageService) {
                 for (exercise in exercisesState.value) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = exercise.replace("_", " "))
+                    }
+                }
+                data?.let {
+                    for (exercise in it) {
+                        if(exercise.name == "Landmine twist"){
+                            Text(text = exercise.name)
+                        }
                     }
                 }
             }

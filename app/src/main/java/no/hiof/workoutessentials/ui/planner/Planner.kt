@@ -1,5 +1,7 @@
 package no.hiof.workoutessentials.ui.planner
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,12 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,6 +50,7 @@ import no.hiof.workoutessentials.service.api.ApiViewModel
 
 var exerciseList: List<Exercise>? = null
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun AddExerciseDialog(
     exerciseList: List<Exercise>,
@@ -51,10 +59,13 @@ fun AddExerciseDialog(
     onDismiss: () -> Unit,
 ) {
     var offset by remember { mutableStateOf(0) }
+    var showDetail by remember { mutableStateOf(false)}
+    var detailedExercise: Exercise? = null
 
     val viewModel: ApiViewModel = viewModel()
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = onDismiss)
+    {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -62,61 +73,97 @@ fun AddExerciseDialog(
                 .padding(16.dp),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                // Your UI for adding exercises
-                LazyColumn(modifier = Modifier.height(400.dp)) {
-                    items(exerciseList) { exercise ->
-                        Button(
-                            onClick = { onAddExercise(exercise) },
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Text(text = exercise.name)
-                        }
+            if (showDetail == true) {
+                detailedExercise?.let {
+                    Column() {
+                        Text(text = "Name: " + it.name)
+                        Text(text = "Muscle Group: " + it.muscle)
+                        Text(text = "Type: " + it.type)
+                        Text(text = "Difficulty: " + it.difficulty)
+                        Text(text = "Equipment: " + it.equipment)
+                        Text(text = "Instructions")
                     }
-                }
-                //Arrow Icons for scrolling through list
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                    Divider(thickness = 2.dp, color = Color.Black)
+                    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = it.instructions, modifier = Modifier
+                            .verticalScroll(
+                                rememberScrollState()
+                            )
+                            .weight(5F, false))
 
-                    IconButton(onClick = {
-                        if (offset > 0) {
-                            offset -= 10
+                        Button(onClick = { showDetail = false }, modifier = Modifier.weight(1F)) {
+                            Text(text = "Exit")
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Scroll Back"
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    IconButton(onClick = { offset += 10 }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "Scroll Forward"
-                        )
                     }
                 }
-                // Confirm and Cancel buttons
-                Row(
+            }
+            else {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .fillMaxSize()
+                        .padding(16.dp)
                 ) {
-                    Button(onClick = onConfirm) {
-                        Text("Confirm")
+                    //UI for adding exercises
+                    LazyColumn(modifier = Modifier.height(400.dp)) {
+                        items(exerciseList) { exercise ->
+                            Row() {
+                                Button(
+                                    onClick = { onAddExercise(exercise) },
+                                    modifier = Modifier.weight(5F)
+                                ) {
+                                    Text(text = exercise.name)
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.Info, "Info",
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .clickable {
+                                            detailedExercise = exercise
+                                            showDetail = true
+                                        })
+                            }
+                        }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = onDismiss) {
-                        Text("Cancel")
+                    //Arrow Icons for scrolling through list
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        IconButton(onClick = {
+                            if (offset > 0) {
+                                offset -= 10
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Scroll Back"
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        IconButton(onClick = { offset += 10 }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = "Scroll Forward"
+                            )
+                        }
+                    }
+                    // Confirm and Cancel buttons
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Button(onClick = onConfirm) {
+                            Text("Confirm")
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Button(onClick = onDismiss) {
+                            Text("Cancel")
+                        }
                     }
                 }
             }
@@ -178,6 +225,7 @@ fun Planner(storageService: StorageService) {
             onDismiss = { showEditor = false }
         )
     }
+
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(

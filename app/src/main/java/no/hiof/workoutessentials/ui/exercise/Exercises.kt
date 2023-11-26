@@ -1,5 +1,6 @@
 package no.hiof.workoutessentials.ui.exercise
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,8 +66,6 @@ fun AddDetailDialog(
                 .padding(16.dp),
             shape = RoundedCornerShape(8.dp)
         ) {
-
-
             Column() {
                 Text(text = "Name: " + exercise.name)
                 Text(text = "Muscle Group: " + exercise.muscle)
@@ -87,6 +89,7 @@ fun AddDetailDialog(
         }
     }
 }
+
 @Composable
 fun Exercises() {
 
@@ -98,6 +101,19 @@ fun Exercises() {
     var exerciseList by remember { mutableStateOf<List<Exercise>>(emptyList()) }
 
     val data by viewModel.data.observeAsState()
+
+    var orientation = false
+
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    when (config.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            orientation = true
+        }
+        else -> {
+            orientation = false
+        }
+    }
 
     LaunchedEffect(offset) {
         val exercise = viewModel.fetchData("exercises?offset=$offset")
@@ -127,36 +143,73 @@ fun Exercises() {
     )
 
     Column {
-        LazyColumn(
-            modifier = Modifier
-                .weight(5F)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            items(exerciseList) { exercise ->
-                Box(
-                    modifier = Modifier
-                        .size(150.dp)
-                        .clickable {
-                            detailedExercise = exercise
-                            showDetail = true
-                        }
-                ) {
-                    Column(
+        if (orientation){
+            LazyRow() {
+                items(exerciseList) {exercise ->
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .size(150.dp)
+                            .clickable {
+                                detailedExercise = exercise
+                                showDetail = true
+                            }
                     ) {
-                        Text(text = exercise.name, style = MaterialTheme.typography.headlineSmall)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Image(
-                            painter = painterResource(exerciseItems[0].image),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = exercise.name,
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Image(
+                                painter = painterResource(exerciseItems[0].image),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
+        }else {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(5F)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                items(exerciseList) { exercise ->
+                    Box(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clickable {
+                                detailedExercise = exercise
+                                showDetail = true
+                            }
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = exercise.name,
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Image(
+                                painter = painterResource(exerciseItems[0].image),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
             }

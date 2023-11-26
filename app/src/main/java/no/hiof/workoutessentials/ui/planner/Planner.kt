@@ -1,6 +1,8 @@
 package no.hiof.workoutessentials.ui.planner
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,7 +27,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,13 +66,32 @@ fun AddExerciseDialog(
 
     val viewModel: ApiViewModel = viewModel()
 
+    var orientation = false
+
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    var cardPaddingH = 16.dp
+    when (config.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            orientation = true
+        }
+        else -> {
+            orientation = false
+        }
+    }
+    if(orientation) {
+        cardPaddingH = 8.dp
+    }
+    else {
+        cardPaddingH = 112.dp
+    }
+
     Dialog(onDismissRequest = onDismiss)
     {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(600.dp)
-                .padding(16.dp),
+                .fillMaxSize()
+                .padding(16.dp, cardPaddingH),
             shape = RoundedCornerShape(8.dp)
         ) {
             if (showDetail == true) {
@@ -104,11 +125,14 @@ fun AddExerciseDialog(
                         .padding(16.dp)
                 ) {
                     //UI for adding exercises
-                    LazyColumn(modifier = Modifier.height(400.dp)) {
+                    LazyColumn(modifier = Modifier.weight(6F)) {
                         items(exerciseList) { exercise ->
                             Row() {
                                 Button(
-                                    onClick = { onAddExercise(exercise) },
+                                    onClick = {
+                                        onAddExercise(exercise)
+                                        Toast.makeText(context, "added ${exercise.name} to list", Toast.LENGTH_SHORT).show()
+                                              },
                                     modifier = Modifier.weight(5F)
                                 ) {
                                     Text(text = exercise.name)
@@ -128,7 +152,8 @@ fun AddExerciseDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp),
+                            .padding(top = 16.dp)
+                            .weight(1F),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
 
@@ -154,7 +179,7 @@ fun AddExerciseDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp),
+                            .weight(1F),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Button(onClick = onConfirm) {
@@ -187,11 +212,25 @@ fun Planner(storageService: StorageService) {
 
     var addingExerciseList by remember { mutableStateOf<List<Exercise>>(emptyList()) }
 
+    var orientation = false
+
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    when (config.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            orientation = true
+        }
+        else -> {
+            orientation = false
+        }
+    }
+
     LaunchedEffect(confirmEdit) {
         if (confirmEdit) {
             try {
                 val exerciseNames = addingExerciseList.map { it.name }
                 storageService.saveExercises(buttonDay, exerciseNames)
+                Toast.makeText(context, "added exercises to $buttonDay", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 // Handle errors
             } finally {
@@ -226,23 +265,9 @@ fun Planner(storageService: StorageService) {
         )
     }
 
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "The Planner",
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
-        )
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    if(orientation) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Mon",
                     textAlign = TextAlign.Center,
@@ -259,18 +284,13 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Tue",
                     textAlign = TextAlign.Center,
@@ -287,18 +307,13 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Wed",
                     textAlign = TextAlign.Center,
@@ -315,18 +330,13 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Thu",
                     textAlign = TextAlign.Center,
@@ -343,18 +353,13 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Fri",
                     textAlign = TextAlign.Center,
@@ -371,18 +376,13 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Sat",
                     textAlign = TextAlign.Center,
@@ -399,18 +399,13 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .weight(1.0F)
-                    .padding(0.dp, 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1F)) {
                 Text(
                     text = "Sun",
                     textAlign = TextAlign.Center,
@@ -427,11 +422,209 @@ fun Planner(storageService: StorageService) {
                         },
                         modifier = Modifier
                             .weight(1.0F)
-                            .padding(10.dp, 0.dp)
+                            .padding(0.dp, 32.dp)
                     ) {
                         Text("Edit")
                     }
                 }
+            }
+        }
+    } else {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Mon",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "monday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Tue",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "thursday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Wed",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "wednesday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Thu",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "thursday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Fri",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "friday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Sat",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "saturday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1.0F)
+                        .padding(0.dp, 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Sun",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.50F)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                showEditor = true
+                                buttonDay = "sunday"
+                            },
+                            modifier = Modifier
+                                .weight(1.0F)
+                        ) {
+                            Text("Edit")
+                        }
+                    }
+                }
+
             }
         }
     }

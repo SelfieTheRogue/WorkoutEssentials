@@ -1,5 +1,6 @@
 package no.hiof.workoutessentials.ui.home
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -101,20 +104,20 @@ fun Home(storageService: StorageService) {
     )
     var selectedDay by remember { mutableStateOf(date.format(formatter)) }
 
-    fun urlGen (exercises: List<String>): String {
-        var url = ""
-        if (exercises != null) {
-            url = "exercises?"
-            for (exercise in exercises) {
-                url = url + "name=" + exercise.replace("_", "+") + "&"
-            }
-            url = url.dropLast(1)
-        }
-
-        return url
-    }
-
     val exercisesState = remember { mutableStateOf<List<String>>(emptyList()) }
+
+    var orientation = false
+
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    when (config.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> {
+            orientation = true
+        }
+        else -> {
+            orientation = false
+        }
+    }
 
     LaunchedEffect(Unit) {
         try {
@@ -186,25 +189,51 @@ fun Home(storageService: StorageService) {
     }
 
     Row (modifier = Modifier.fillMaxSize()){
-        Column (horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.weight(.3F)){
+        if (orientation) {
             Column (horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(0.dp, 3.dp)
-                    .weight(1F)){
-
-
-                for (date in weekDates) {
-                    Button(onClick = {selectedDay = date.format(formatter)
-                        buttonClicked = true
-                                     },
-                        modifier = Modifier
-                            .weight(1F)
-                            .fillMaxWidth(), shape = RectangleShape) {
-                        Text(date.format(formatter), modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.weight(.3F)){
+                Column (horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp)
+                        .verticalScroll(rememberScrollState())
+                        .weight(1F, false)
+                )
+                {
+                    for (date in weekDates) {
+                        Button(onClick = {
+                            selectedDay = date.format(formatter)
+                            buttonClicked = true
+                        },
+                            modifier = Modifier
+                                .fillMaxWidth(), shape = RectangleShape
+                        ) {
+                            Text(date.format(formatter).replaceRange(3,date.format(formatter).length, ""), modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 }
-
+            }
+        } else {
+            Column (horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(.3F)){
+                Column (horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp)
+                        .weight(1F)
+                )
+                {
+                    for (date in weekDates) {
+                        Button(onClick = {
+                            selectedDay = date.format(formatter)
+                            buttonClicked = true
+                        },
+                            modifier = Modifier
+                                .weight(1F)
+                                .fillMaxWidth(), shape = RectangleShape
+                        ) {
+                            Text(date.format(formatter).replaceRange(3,date.format(formatter).length, ""), modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
             }
         }
         Column (horizontalAlignment = Alignment.CenterHorizontally,
